@@ -1,10 +1,10 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from dlq_handler.src.handler import DLQHandler
+from src.handler import DLQHandler
 
 class TestDLQHandler(unittest.TestCase):
 
-    @patch('dlq_handler.src.handler.SQSQueue')
+    @patch('src.handler.SQSQueue')
     def setUp(self, MockSQSQueue):
         self.mock_sqs_queue = MockSQSQueue.return_value
         self.handler = DLQHandler(

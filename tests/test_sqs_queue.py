@@ -1,10 +1,10 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from dlq_handler.src.sqs_queue import SQSQueue
+from src.sqs_queue import SQSQueue
 
 class TestSQSQueue(unittest.TestCase):
 
-    @patch('dlq_handler.src.sqs_queue.boto3.client')
+    @patch('src.sqs_queue.boto3.client')
     def setUp(self, mock_boto3_client):
         self.mock_sqs_client = MagicMock()
         mock_boto3_client.return_value = self.mock_sqs_client
