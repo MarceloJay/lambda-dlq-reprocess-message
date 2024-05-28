@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="dlq_handlerl_lib",
-    version="0.1.3",
+    version="0.1.4",
     description="A library for handling DLQ messages in AWS SQS",
     long_description=open('README.md').read(),
     long_description_content_type="text/markdown",
