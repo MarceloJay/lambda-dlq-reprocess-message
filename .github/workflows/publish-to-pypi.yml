@@ -1,9 +1,9 @@
 name: Publish Python Package
 
 on:
-  push:
-    tags:
-      - 'v*.*.*'  # Executa a ação quando um tag é criado no formato v1.2.3
+  pull_request:
+    types: closed
+    branches: develop
 
 jobs:
   publish:
