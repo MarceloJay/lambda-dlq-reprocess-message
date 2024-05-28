@@ -5,13 +5,13 @@ from .sqs_queue import SQSQueue
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-class DLQHandler:
+class Process:
     def __init__(self, queue_url, original_queue_url, max_attempts=5):
         self.dlq_queue = SQSQueue(queue_url, max_attempts)
         self.original_queue_url = original_queue_url
         self.max_attempts = max_attempts
 
-    def process_messages(self):
+    def execute(self):
         messages = self.dlq_queue.receive_messages()
         if not messages:
             return
