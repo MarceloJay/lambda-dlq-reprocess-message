@@ -5,7 +5,7 @@ from .sqs_queue import SQSQueue
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-class Process:
+class DLQHandler:
     def __init__(self, queue_url, original_queue_url, max_attempts=5):
         self.dlq_queue = SQSQueue(queue_url, max_attempts)
         self.original_queue_url = original_queue_url

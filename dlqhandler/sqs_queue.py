@@ -8,8 +8,7 @@ class SQSQueue:
     def __init__(self, queue_url, max_attempts=5):
         self.queue_url = queue_url
         self.max_attempts = max_attempts
-        self.sqs_client = boto3.client("sqs"
-)
+        self.sqs_client = boto3.client("sqs", region_name="sa-east-1")
     def receive_messages(self, max_number=10, wait_time=0):
         try:
             logger.info('Fetching messages from SQS queue')
