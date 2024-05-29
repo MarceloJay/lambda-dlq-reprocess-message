@@ -5,40 +5,38 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 class SQSQueue:
-    def __init__(self, queue_url, max_attempts=5):
+    def __init__(self, queue_url, region_name='us-east-1'):
         self.queue_url = queue_url
-        self.max_attempts = max_attempts
-        self.sqs_client = boto3.client("sqs"
-)
-    def receive_messages(self, max_number=10, wait_time=0):
+        self.sqs_client = boto3.client("sqs", region_name=region_name)
+
+    def receive_messages_dlq(self, event=None, max_number=10, wait_time=0):
         try:
-            logger.info('Fetching messages from SQS queue')
+            logger.info('Starting to read messages from the queue')
+            
             messages = self.sqs_client.receive_message(
                 QueueUrl=self.queue_url,
                 AttributeNames=['All'],
                 MaxNumberOfMessages=max_number,
                 WaitTimeSeconds=wait_time
             )
-            logger.info('Received messages from SQS: %s', messages)
 
+            logger.info('Received messages: %s', messages)
             if 'Messages' not in messages:
                 logger.info('No messages to retrieve from SQS: Empty content')
                 return []
 
-            parsed_messages = [(msg['Body'], msg['ReceiptHandle']) for msg in messages['Messages']]
-            logger.debug('Parsed messages: %s', parsed_messages)
-            return parsed_messages
+            return [(msg['Body'], msg['ReceiptHandle']) for msg in messages['Messages']]
         except Exception as e:
             logger.exception("Error receiving messages: %s", e)
             return []
 
-    def delete_message(self, receipt_handle):
+    def delete_message_dlq(self, receipt_handle):
         try:
-            response = self.sqs_client.delete_message(
+            self.sqs_client.delete_message(
                 QueueUrl=self.queue_url,
                 ReceiptHandle=receipt_handle
             )
-            logger.info("Message deleted from the queue: %s", response)
+            logger.info(f"Message with receipt handle {receipt_handle} deleted successfully.")
         except Exception as e:
             logger.exception("Error deleting message: %s", e)
             raise e
