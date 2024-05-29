@@ -11,11 +11,15 @@ pip install dlq_handler_lib
 
 from dlq_handler_lib import DLQHandler
 
-# Initialize the DLQHandler with the queue URL, original queue URL, and maximum attempts
+# Initialize the DLQHandler with the required parameters
 handler = DLQHandler(
-    queue_url='https://sqs.us-east-1.amazonaws.com/123456789012/my-dlq',
+    dlq_queue_url='https://sqs.us-east-1.amazonaws.com/123456789012/my-dlq',
     original_queue_url='https://sqs.us-east-1.amazonaws.com/123456789012/my-queue',
-    max_attempts=5
+    max_attempts=5,
+    region_name='us-east-1',
+    env=my_env_config,  # replace with your actual environment config
+    nome_lambda='lambda-reprocessamento-dlq',
+    namespace='DLQ-Mensageria'
 )
 
 # Process the messages from the DLQ
