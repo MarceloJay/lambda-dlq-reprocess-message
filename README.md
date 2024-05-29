@@ -12,7 +12,7 @@ pip install dlqhandler
 from dlqhandler import ProcessMessage
 
 # Initialize the DLQHandler with the required parameters
-handler = DLQHandler(
+handler = ProcessMessage(
     dlq_queue_url='https://sqs.us-east-1.amazonaws.com/123456789012/my-dlq',
     original_queue_url='https://sqs.us-east-1.amazonaws.com/123456789012/my-queue',
     max_attempts=5,
