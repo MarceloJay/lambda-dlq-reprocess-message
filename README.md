@@ -7,9 +7,9 @@ A library for handling DLQ (Dead Letter Queue) messages in AWS SQS. This library
 To install the library, use `pip`:
 
 ```sh
-pip install dlq_handler_lib
+pip install dlqhandler
 
-from dlq_handler_lib import DLQHandler
+from dlqhandler import ProcessMessage
 
 # Initialize the DLQHandler with the required parameters
 handler = DLQHandler(
