@@ -2,8 +2,8 @@ from setuptools import setup, find_packages
 
 setup(
     name='dlqhandler',
-    version="0.1.7",
-    packages=['handler', 'handler.services', 'handler.dataprovider'],
+    version="0.1.8",
+    packages=['dlqhandler', 'dlqhandler.services', 'dlqhandler.dataprovider'],
     install_requires=[
         'boto3',
         'mock'

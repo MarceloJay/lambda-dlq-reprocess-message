@@ -1,8 +1,8 @@
 import json
 import logging
-from handler.dataprovider.send_to_aws_sqs import SendToAwsSqs
+from dlqhandler.dataprovider.send_to_aws_sqs import SendToAwsSqs
 from .cloudwatch import CloudWatch
-from handler.dataprovider.sqs_queue import SQSQueue
+from dlqhandler.dataprovider.sqs_queue import SQSQueue
 
 ERROR_STATUS = "ERRO"
 ERROR_MESSAGE = "Número de retentativas excedido"
