@@ -61,3 +61,64 @@ class TestProcessMessage(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+import unittest
+from unittest.mock import patch, MagicMock
+from app.src.lambda_function import Process
+
+class TestProcess(unittest.TestCase):
+
+    @patch('app.src.config.environment.Environment')
+    def test_execute_success(self, mock_environment):
+        
+        mock_env = MagicMock()
+        mock_env.url_sqs_orquestrador_dlq.return_value = 'mock_dlq_url'
+        mock_env.url_sqs_orquestrador.return_value = 'mock_queue_url'
+        mock_env.aws_region.return_value = 'mock_region'
+        mock_env.name_lambda.return_value = 'mock_lambda'
+        mock_env.namespace_cloudwatch.return_value = 'mock_namespace'
+
+        mock_environment.return_value = mock_env
+
+        process = Process()
+
+        process_message_mock = MagicMock()
+        process_message_mock.execute.return_value = "mock_result"
+
+        with patch('app.src.lambda_function.ProcessMessage', return_value=process_message_mock):
+            
+            result = process.execute()
+
+            process_message_mock.execute.assert_called_once()
+
+            print(f"result 01: {result}")
+            self.assertEqual(result, "mock_result")
+
+    @patch('app.src.config.environment.Environment')
+    def test_execute_exception(self, mock_environment):
+        
+        mock_env = MagicMock()
+        mock_env.url_sqs_orquestrador_dlq.return_value = 'mock_dlq_url'
+        mock_env.url_sqs_orquestrador.return_value = 'mock_queue_url'
+        mock_env.aws_region.return_value = 'mock_region'
+        mock_env.name_lambda.return_value = 'mock_lambda'
+        mock_env.namespace_cloudwatch.return_value = 'mock_namespace'
+
+        mock_environment.return_value = mock_env
+
+        process = Process()
+
+        process_message_mock = MagicMock()
+        process_message_mock.execute.side_effect = Exception("mock_exception")
+
+        with patch('app.src.lambda_function.ProcessMessage', return_value=process_message_mock):
+           
+            result = process.execute()
+
+            process_message_mock.execute.assert_called_once()
+
+            print(f"result 02: {result}")
+            self.assertEqual(result, {"error": "mock_exception"})         
+
+if __name__ == '__main__':
+    unittest.main()    
