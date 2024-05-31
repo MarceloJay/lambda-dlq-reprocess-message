@@ -1,7 +1,7 @@
 import unittest
 import json
 from unittest.mock import patch, MagicMock
-from dlqhandler import ProcessMessage
+from dlqhandler.services.process import ProcessMessage
 
 class TestProcessMessage(unittest.TestCase):
 
