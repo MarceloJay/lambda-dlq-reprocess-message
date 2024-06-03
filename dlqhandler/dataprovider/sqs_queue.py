@@ -28,8 +28,43 @@ class SQSQueue:
             if 'Messages' not in messages:
                 logger.info('No messages to retrieve from SQS: Empty content')
                 return []
+            
+            result = []
+            for msg in messages['Messages']:
+                try:
+                    # Garantir que 'Body' é um JSON válido
+                    body = json.loads(msg['Body'])
+                    
+                    # Garantir que 'Attributes' é um dicionário
+                    attributes = msg.get('Attributes', {})
+                    if not isinstance(attributes, dict):
+                        attributes = {}
+                    
+                    # Extração de attempts
+                    attempts = int(attributes.get('ApproximateReceiveCount', 0))
+                    
+                    # Criação do objeto Message
+                    message_obj = Message(
+                        service=body.get('Service', ''),
+                        event=body.get('Event', ''),
+                        time=body.get('Time', ''),
+                        bucket=body.get('Bucket', ''),
+                        request_id=body.get('RequestId', ''),
+                        host_id=body.get('HostId', '')
+                    )
+                    
+                    result.append((message_obj, msg['ReceiptHandle'], attempts))
+                
+                except json.JSONDecodeError as e:
+                    logger.error(f"Error decoding JSON: {e}")
+                except KeyError as e:
+                    logger.error(f"Missing expected key: {e}")
+                except Exception as e:
+                    logger.error(f"Unexpected error: {e}")
+                
+            return result
 
-            return [(msg['Body'], msg['ReceiptHandle']) for msg in messages['Messages']]
+            #return [(msg['Body'], msg['ReceiptHandle']) for msg in messages['Messages']]
         except Exception as e:
             logger.exception("Error receiving messages: %s", e)
             return []
