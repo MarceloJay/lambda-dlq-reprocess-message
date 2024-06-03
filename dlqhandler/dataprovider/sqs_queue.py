@@ -7,6 +7,7 @@ logger.setLevel(logging.INFO)
 class SQSQueue:
     def __init__(self, queue_url, region_name='us-east-1'):
         self.queue_url = queue_url
+        self.session = boto3.Session()
         self.sqs_client = boto3.client("sqs", region_name=region_name)
 
     def receive_messages_dlq(self, event=None, max_number=10, wait_time=0):
