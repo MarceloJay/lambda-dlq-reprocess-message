@@ -1,5 +1,8 @@
 import boto3
 import logging
+import json
+
+from dlqhandler.event.message import Message
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -25,8 +28,20 @@ class SQSQueue:
             if 'Messages' not in messages:
                 logger.info('No messages to retrieve from SQS: Empty content')
                 return []
+            result = []  
+            for msg in messages['Messages']:
+                body = json.loads(msg['Body'])
+                message_obj = Message(
+                    service=body['Service'],
+                    event=body['Event'],
+                    time=body['Time'],
+                    bucket=body['Bucket'],
+                    request_id=body['RequestId'],
+                    host_id=body['HostId']
+                )
+                result.append(message_obj.to_dict(), msg['ReceiptHandle'])
 
-            return [(msg['Body'], msg['ReceiptHandle']) for msg in messages['Messages']]
+            return result
         except Exception as e:
             logger.exception("Error receiving messages: %s", e)
             return []
