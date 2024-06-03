@@ -1,6 +1,6 @@
 pytest==4.6.5
 pytest-cov
-requests
+
 boto3
 moto
 mock
