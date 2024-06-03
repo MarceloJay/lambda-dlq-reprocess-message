@@ -17,14 +17,16 @@ logger.setLevel(logging.INFO)
 class ProcessMessage:
     def __init__(self, dlq_queue_url, original_queue_url, max_attempts=5, region_name='us-east-1', env=None, 
                  nome_lambda='lambda-reprocessamento-dlq', namespace='DLQ-Mensageria'):
-        self.dlq_queue = SQSQueue(dlq_queue_url, region_name)
+        self.dlq_queue = dlq_queue_url
         self.original_queue_url = original_queue_url
         self.max_attempts = max_attempts
+        self.region_name = region_name
         self.cloudwatch = CloudWatch(env, nome_lambda, namespace)
         self.env = env
 
     def execute(self):
-        messages = self.dlq_queue.receive_messages_dlq()
+        sqs_queue = SQSQueue(self.dlq_queue, self.region_name)
+        messages = sqs_queue.receive_messages_dlq()
         
         if not messages:
             return {'message': 'No messages to process'}
