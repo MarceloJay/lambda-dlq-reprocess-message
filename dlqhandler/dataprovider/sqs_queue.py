@@ -62,7 +62,7 @@ class SQSQueue:
                 except Exception as e:
                     logger.error(f"Unexpected error: {e}")
                 
-                return result
+            return result
 
             #return [(msg['Body'], msg['ReceiptHandle']) for msg in messages['Messages']]
         except Exception as e:
