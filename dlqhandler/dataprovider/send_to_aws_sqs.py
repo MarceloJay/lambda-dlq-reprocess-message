@@ -13,7 +13,8 @@ class SendToAwsSqs:
         try:
             logger.info("enviar_mensagem_sqs >> %s", json.loads(messagebody))
             sqs_link = self.env.url_sqs_orquestrador()
-            sqs = boto3.client(service_name="sqs")
+            session = boto3.Session()
+            sqs = session.client(service_name="sqs")
 
             if self.env != "TAAC":
                 sqs.send_message(
