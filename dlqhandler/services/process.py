@@ -35,35 +35,37 @@ class ProcessMessage:
             message = json.loads(body)
             logger.info(f"Processing message: {message}")
 
-            attempts = int(message.get('Attributes', {}).get(ATTEMPTS_KEY, 0))
+            if not receipt_handle.get(ATTEMPTS_KEY):
+                receipt_handle[ATTEMPTS_KEY] = 0
+
+            attempts = receipt_handle[ATTEMPTS_KEY]    
+
             logger.info(f"processamento_tentativas: {attempts}")
             if attempts > self.max_attempts:
                 self.set_status(message, ERROR_STATUS, ERROR_MESSAGE)
                 self.cloudwatch.count('maximo_reprocessamento_alcancada', attempts)
-                self.dlq_queue.delete_message_dlq(receipt_handle)
+                #self.dlq_queue.delete_message_dlq(receipt_handle)
                 logger.error(f"Máximo de retentativas alcançadas: {message}")
                 
             else:
                 logger.info(f"Mensagem para ser reprocessada: {message}")
-                self.increment_attempts(message)
-                self.set_status(message, REPROCESSING_STATUS)
+                self.increment_attempts(receipt_handle)
+                self.set_status(receipt_handle, REPROCESSING_STATUS)
                 self.send_to_aws_sqs(self.env, message)
                 self.count_retry_metric(message)
 
-            self.dlq_queue.delete_message_dlq(receipt_handle)
+            #self.dlq_queue.delete_message_dlq(receipt_handle)
 
         return {
             'message': 'Mensagem reenviada para fila',
             'sqs': message
         }
 
-    def increment_attempts(self, message):
-        message[ATTEMPTS_KEY] = message.get(ATTEMPTS_KEY, 0) + 1
+    def increment_attempts(self, receipt_handle):
+        receipt_handle[ATTEMPTS_KEY] = receipt_handle[ATTEMPTS_KEY] + 1
 
-    def set_status(self, message, status, msg=None):
-        message[STATUS_KEY] = status
-        if msg:
-            message[MESSAGE_KEY] = msg
+    def set_status(self, receipt_handle, status, msg=None):
+        receipt_handle[STATUS_KEY] = status
 
     def send_to_aws_sqs(self, env, messagebody):
         send_to_sqs = SendToAwsSqs(env)
