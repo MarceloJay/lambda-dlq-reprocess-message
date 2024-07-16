@@ -11,9 +11,12 @@ class SQSQueue:
         self.session = boto3.Session()
         self.sqs_client = boto3.client("sqs", region_name=region_name)
 
-    def receive_messages_dlq(self, event=None, max_number=10, wait_time=0):
+    def receive_messages_dlq(self, event, max_number=10, wait_time=0):
         try:
             logger.info('Starting to read messages from the queue')
+
+            if self.env.env() == 'TAAC':
+                messages = event
             
             messages = self.sqs_client.receive_message(
                 QueueUrl=self.queue_url,
