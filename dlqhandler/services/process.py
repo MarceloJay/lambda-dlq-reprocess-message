@@ -24,12 +24,19 @@ class ProcessMessage:
         self.cloudwatch = CloudWatch(env, nome_lambda, namespace)
         self.env = env
 
-    def execute(self):
+    def execute(self, event):
+
+        logging.info("Executing event")
+
         sqs_queue = SQSQueue(self.dlq_queue, self.region_name)
-        messages = sqs_queue.receive_messages_dlq()
+        messages = sqs_queue.receive_messages_dlq(event)
         
-        if not messages:
+        qtd_msg_capturadas = len(messages)
+        if qtd_msg_capturadas == 0:
+            logging.info("Não existem mensagens para extrair da DlQ orquestrador mensageria")
             return {'message': 'No messages to process'}
+        else:
+            logging.info(f"Quantidade de mensagens capturadas: {qtd_msg_capturadas}")
 
         for body, receipt_handle in messages:
             message = json.loads(body)
