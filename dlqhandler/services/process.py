@@ -42,7 +42,7 @@ class ProcessMessage:
             logging.info(f"Quantidade de mensagens capturadas: {qtd_msg_capturadas}")    
 
         for message in messages:
-            body = json.loads(message.get('body'))
+            body = message.get('body')
             logging.info(f"Processing message: {body}")
             attributes = message.get('attributes')
 
@@ -59,9 +59,8 @@ class ProcessMessage:
                 # self.dlq_queue.delete_message_dlq(receipt_handle)
                 logging.info(f"Máximo de retentativas alcançadas: {message}")
             else:
-                logging.info(f"Mensagem para ser reprocessada: {message}")
                 self.increment_attempts(attributes)
-                logging.info(f"processamento_tentativas: {attempts}")
+                logging.info(f"processamento_tentativas: {attributes[ATTEMPTS_KEY]}")
                 self.set_status(attributes, REPROCESSING_STATUS)
                 logging.info(f"processamento_status: {attributes[STATUS_KEY]}")
                 self.send_to_aws_sqs(self.env, message)
