@@ -43,27 +43,30 @@ class ProcessMessage:
 
         for message in messages:
             body = json.loads(message.get('body'))
-            attributes = message.get('attributes')
             logging.info(f"Processing message: {body}")
-            logging.info(f"receipt_handle: {attributes}")
+            attributes = message.get('attributes')
+            logging.info(f"processamento_tentativas: {attributes[ATTEMPTS_KEY]}")
 
             if not attributes.get(ATTEMPTS_KEY):
                 attributes[ATTEMPTS_KEY] = 0
-            logging.info(f"receipt_handle: {attributes}")
 
             attempts = attributes[ATTEMPTS_KEY]
             logging.info(f"processamento_tentativas: {attempts}")
 
             if attempts > self.max_attempts:
-                self.set_status(message, ERROR_STATUS, ERROR_MESSAGE)
-                self.cloudwatch.count('maximo_reprocessamento_alcancada', attempts)
+                self.set_status(attributes, ERROR_STATUS, ERROR_MESSAGE)
+                logging.info(f"processamento_status: {attributes[STATUS_KEY]}")
+                self.cloudwatch.count(ERROR_MESSAGE, attempts)
                 # self.dlq_queue.delete_message_dlq(receipt_handle)
                 logging.info(f"Máximo de retentativas alcançadas: {message}")
             else:
                 logging.info(f"Mensagem para ser reprocessada: {message}")
                 self.increment_attempts(attributes)
+                logging.info(f"processamento_tentativas: {attempts}")
                 self.set_status(attributes, REPROCESSING_STATUS)
+                logging.info(f"processamento_status: {attributes[STATUS_KEY]}")
                 self.send_to_aws_sqs(self.env, message)
+                logging.info(f"Send Message Sqs Queue: {self.original_queue_url}")
                 self.count_retry_metric(attempts)
 
             #self.dlq_queue.delete_message_dlq(receipt_handle)
@@ -73,11 +76,11 @@ class ProcessMessage:
             'sqs': message
         }
 
-    def increment_attempts(self, receipt_handle):
-        receipt_handle[ATTEMPTS_KEY] = receipt_handle[ATTEMPTS_KEY] + 1
+    def increment_attempts(self, attributes):
+        attributes[ATTEMPTS_KEY] = attributes[ATTEMPTS_KEY] + 1
 
-    def set_status(self, receipt_handle, status, msg=None):
-        receipt_handle[STATUS_KEY] = status
+    def set_status(self, attributes, status, msg=None):
+        attributes[STATUS_KEY] = status
 
     def send_to_aws_sqs(self, env, messagebody):
         send_to_sqs = SendToAwsSqs(env)
