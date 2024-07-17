@@ -45,7 +45,6 @@ class ProcessMessage:
             body = json.loads(message.get('body'))
             logging.info(f"Processing message: {body}")
             attributes = message.get('attributes')
-            logging.info(f"processamento_tentativas: {attributes[ATTEMPTS_KEY]}")
 
             if not attributes.get(ATTEMPTS_KEY):
                 attributes[ATTEMPTS_KEY] = 0
