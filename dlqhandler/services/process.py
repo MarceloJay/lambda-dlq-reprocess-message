@@ -30,8 +30,8 @@ class ProcessMessage:
         sqs_queue = SQSQueue(self.dlq_queue, self.region_name)
         messages_from_dlq = sqs_queue.receive_messages_dlq(event)
         
-        messages = event.get('Records', [])
-        if messages_from_dlq:
+        messages = event
+        if messages_from_dlq != []:
             messages.extend(messages_from_dlq)
 
         qtd_msg_capturadas = len(messages)
