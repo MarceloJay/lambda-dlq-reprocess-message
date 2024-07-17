@@ -28,18 +28,18 @@ class ProcessMessage:
         logging.info("Executing event")
         
         sqs_queue = SQSQueue(self.dlq_queue, self.region_name)
-        messages = sqs_queue.receive_messages_dlq(event)
-        # messages = event.get('Records', [])
+        messages_from_dlq = sqs_queue.receive_messages_dlq(event)
         
+        messages = event.get('Records', [])
+        if messages_from_dlq:
+            messages.extend(messages_from_dlq)
+
         qtd_msg_capturadas = len(messages)
         if qtd_msg_capturadas == 0:
             logging.info("Não existem mensagens para extrair da DLQ orquestrador mensageria")
-            if event.get('Records') is None:
-                return {'message': 'No messages to process'}
-            else:
-                messages = event.get('Records')
+            return {'message': 'No messages to process'}
         else:
-            logging.info(f"Quantidade de mensagens capturadas: {qtd_msg_capturadas}")
+            logging.info(f"Quantidade de mensagens capturadas: {qtd_msg_capturadas}")    
 
         for message in messages:
             body = json.loads(message.get('body'))
