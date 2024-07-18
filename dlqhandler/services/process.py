@@ -45,6 +45,7 @@ class ProcessMessage:
                 msg_a_ser_processada = msg[0]
                 try:
                     dict_msg = json.loads(msg_a_ser_processada)
+                    logging.info(f"Processing message: {dict_msg}")
                     response = self.process_message(dict_msg)
                     response_list.append(response)
                     logging.info("Mensagem reenviada para fila orquestrador com sucesso! %s", response)
@@ -85,13 +86,13 @@ class ProcessMessage:
             else:
                 if message.get('body'):
                     message = message.get('body')
-                    
+
                 self.increment_attempts(message)
                 logging.info(f"processamento_tentativas: {message[ATTEMPTS_KEY]}")
                 self.set_status(message, REPROCESSING_STATUS)
                 logging.info(f"processamento_status: {message[STATUS_KEY]}")
-                self.send_to_aws_sqs(self.env, message.get('body'))
                 logging.info(f"Send Message Sqs Queue: {self.original_queue_url}")
+                self.send_to_aws_sqs(self.env, message.get('body'))
                 self.count_retry_metric(attempts)
                 #self.dlq_queue.delete_message_dlq(receipt_handle)
             
@@ -113,7 +114,8 @@ class ProcessMessage:
 
     def send_to_aws_sqs(self, env, messagebody):
         send_to_sqs = SendToAwsSqs(env)
-        send_to_sqs.send_message_to_queue(json.dumps(messagebody))
+        # send_to_sqs.send_message_to_queue(json.dumps(messagebody))
+        send_to_sqs.send_message_to_queue(messagebody)
 
 
     def count_retry_metric(self, attempts):
