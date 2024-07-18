@@ -26,10 +26,9 @@ class ProcessMessage:
 
     def execute(self, event):
         logging.info("Executing event")
-        logging.info(f"Environment: {self.env}")
 
         sqs_queue = SQSQueue(self.dlq_queue, self.region_name)
-        messages = sqs_queue.receive_messages_dlq(event, self.env)
+        messages = sqs_queue.receive_messages_dlq(event)
 
         qtd_msg_capturadas = len(messages)
         if qtd_msg_capturadas == 0:
