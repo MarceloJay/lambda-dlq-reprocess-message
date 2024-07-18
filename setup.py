@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='dlqhandler',
-    version="0.6.1",
+    version="0.6.2",
     packages=['dlqhandler', 'dlqhandler.services', 'dlqhandler.dataprovider'],
     install_requires=[
         'boto3',
