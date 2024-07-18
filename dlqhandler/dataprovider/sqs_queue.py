@@ -25,12 +25,13 @@ class SQSQueue:
             logger.info('\nReceived messages: %s\n', messages)
 
             if 'Messages' not in messages:
-                if not event.get('body'):
+                if not event.get('Records'):
                     logger.info('No messages to retrieve from SQS: Empty content')
                     return []
                 else:
                     messages = event
                     logger.info('\nReceived messages event: %s\n', messages)
+                    return [(msg['body'], msg['attributes']) for msg in messages['Records']]
 
             return [(msg['Body'], msg['ReceiptHandle']) for msg in messages['Messages']]
         
