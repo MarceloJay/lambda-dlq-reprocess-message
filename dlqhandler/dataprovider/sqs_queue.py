@@ -22,10 +22,15 @@ class SQSQueue:
                 WaitTimeSeconds=wait_time
             )
 
-            logger.info('Received messages: %s', messages)
+            logger.info('\nReceived messages: %s\n', messages)
+
             if 'Messages' not in messages:
-                logger.info('No messages to retrieve from SQS: Empty content')
-                return []
+                if not event.get('body'):
+                    logger.info('No messages to retrieve from SQS: Empty content')
+                    return []
+                else:
+                    messages = event
+                    logger.info('\nReceived messages event: %s\n', messages)
 
             return [(msg['Body'], msg['ReceiptHandle']) for msg in messages['Messages']]
         
