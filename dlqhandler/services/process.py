@@ -25,7 +25,7 @@ class ProcessMessage:
         self.env = env
 
     def execute(self, event):
-        logging.info("Executing event")
+        logger.info("Executing event")
         try:
             sqs_queue = SQSQueue(self.dlq_queue, self.region_name)
             messages = sqs_queue.receive_messages_dlq(event)
@@ -33,10 +33,10 @@ class ProcessMessage:
             qtd_msg_capturadas = len(messages)
             
             if qtd_msg_capturadas == 0:
-                logging.info("Não existem mensagens para extrair da DLQ orquestrador mensageria: Conteúdo vazio!")
+                logger.info("Não existem mensagens para extrair da DLQ orquestrador mensageria: Conteúdo vazio!")
                 return {'message': 'No messages to process'}
             else:
-                logging.info(f"Quantidade de mensagens capturadas: {qtd_msg_capturadas}")
+                logger.info(f"Quantidade de mensagens capturadas: {qtd_msg_capturadas}")
             
             response_list = []
             qtd_msg_processadas = 0
@@ -45,10 +45,10 @@ class ProcessMessage:
                 msg_a_ser_processada = msg[0]
                 try:
                     dict_msg = json.loads(msg_a_ser_processada)
-                    logging.info(f"Processing message: {dict_msg}")
+                    logger.info(f"Processing message: {dict_msg}")
                     response = self.process_message(dict_msg)
                     response_list.append(response)
-                    logging.info("Mensagem reenviada para fila orquestrador com sucesso! %s", response)
+                    logger.info("Mensagem reenviada para fila orquestrador com sucesso! %s", response)
                     qtd_msg_processadas += 1
                 except Exception as ex:
                     logging.error("Erro ao processar a mensagem: %s", str(msg_a_ser_processada))
@@ -68,31 +68,31 @@ class ProcessMessage:
 
     def process_message(self, message):
         
-        logging.info(f"Processing message: {message}")
+        logger.info(f"Processing message: {message}")
         try:
             
             if not message.get(ATTEMPTS_KEY):
                 message[ATTEMPTS_KEY] = 0
             
             attempts = message[ATTEMPTS_KEY]
-            logging.info(f"processamento_tentativas: {attempts}")
+            logger.info(f"processamento_tentativas: {attempts}")
             
             if attempts > self.max_attempts:
                 self.set_status(message, ERROR_STATUS, ERROR_MESSAGE)
-                logging.info(f"processamento_status: {message[STATUS_KEY]}")
-                self.cloudwatch.count(ERROR_MESSAGE, attempts)
+                logger.info(f"processamento_status: {message[STATUS_KEY]}")
+                self.cloudwatch.count("Máximo de retentativas alcançadas", attempts)
                 # self.dlq_queue.delete_message_dlq(receipt_handle)
-                logging.info(f"Máximo de retentativas alcançadas: {message}")
+                logging.error(f"Máximo de retentativas alcançadas: {message}")
             else:
                 if message.get('body'):
                     message = message.get('body')
                     logging.info(f"Message body: {message.get('body')}")
 
                 self.increment_attempts(message)
-                logging.info(f"processamento_tentativas: {message[ATTEMPTS_KEY]}")
+                logger.info(f"processamento_tentativas: {message[ATTEMPTS_KEY]}")
                 self.set_status(message, REPROCESSING_STATUS)
-                logging.info(f"processamento_status: {message[STATUS_KEY]}")
-                logging.info(f"Send Message Sqs Queue: {self.original_queue_url}")
+                logger.info(f"processamento_status: {message[STATUS_KEY]}")
+                logger.info(f"Send Message Sqs Queue: {self.original_queue_url}")
                 self.send_to_aws_sqs(self.env, message)
                 self.count_retry_metric(attempts)
                 #self.dlq_queue.delete_message_dlq(receipt_handle)
@@ -115,7 +115,6 @@ class ProcessMessage:
 
     def send_to_aws_sqs(self, env, messagebody):
         send_to_sqs = SendToAwsSqs(env)
-        logging.info(f"Mensagem : {json.dumps(messagebody)}")
         logging.info(f"Mensagem : {messagebody}")
         send_to_sqs.send_message_to_queue(json.dumps(messagebody))
 
