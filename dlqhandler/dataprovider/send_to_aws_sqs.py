@@ -12,7 +12,7 @@ class SendToAwsSqs:
     def send_message_to_queue(self, messagebody):
         try:
             logger.info("enviar_mensagem_sqs >> %s", json.loads(messagebody))
-            logging.info(f"Enviando Mensagem: {json.dumps(messagebody)}")
+            
             sqs_link = self.env.url_sqs_orquestrador()
             session = boto3.Session()
             sqs = session.client(service_name="sqs")
