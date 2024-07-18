@@ -26,28 +26,56 @@ class ProcessMessage:
 
     def execute(self, event):
         logging.info("Executing event")
+        try:
+            sqs_queue = SQSQueue(self.dlq_queue, self.region_name)
+            messages = sqs_queue.receive_messages_dlq(event)
 
-        sqs_queue = SQSQueue(self.dlq_queue, self.region_name)
-        messages = sqs_queue.receive_messages_dlq(event)
+            qtd_msg_capturadas = len(messages)
+            
+            if qtd_msg_capturadas == 0:
+                logging.info("Não existem mensagens para extrair da DLQ orquestrador mensageria: Conteúdo vazio!")
+                return {'message': 'No messages to process'}
+            else:
+                logging.info(f"Quantidade de mensagens capturadas: {qtd_msg_capturadas}")
+            
+            response_list = []
+            qtd_msg_processadas = 0
+            
+            for msg in messages:
+                msg_a_ser_processada = msg[0]
+                try:
+                    dict_msg = json.loads(msg_a_ser_processada)
+                    response = self.process_message(dict_msg)
+                    response_list.append(response)
+                    logging.info("Mensagem reenviada para fila orquestrador com sucesso! %s", response)
+                    qtd_msg_processadas += 1
+                except Exception as ex:
+                    logging.error("Erro ao processar a mensagem: %s", str(msg_a_ser_processada))
+                    logging.error("Exception gerada: %s", str(ex))
+            
+            if qtd_msg_capturadas == qtd_msg_processadas:
+                logging.info("Todas as mensagens capturadas foram processadas!")
+            else:
+                logging.error("Foram capturadas %s mensagens porém foram processadas %s", qtd_msg_capturadas, qtd_msg_processadas)
+            
+            return response_list
+        
+        except Exception as ex:
+            logging.error("Erro no reprocessamento da mensagems para fila do orquestrador %s", str(ex))
+            return {'error': str(ex)}
 
-        qtd_msg_capturadas = len(messages)
-        if qtd_msg_capturadas == 0:
-            logging.info("Não existem mensagens para extrair da DLQ orquestrador mensageria")
-            return {'message': 'No messages to process'}
-        else:
-            logging.info(f"Quantidade de mensagens capturadas: {qtd_msg_capturadas}")    
 
-        for message in messages:
-            body = message.get('body')
-            logging.info(f"Processing message: {body}")
+    def process_message(self, message):
+        
+        logging.info(f"Processing message: {message}")
+        try:
             attributes = message.get('attributes')
-
             if not attributes.get(ATTEMPTS_KEY):
                 attributes[ATTEMPTS_KEY] = 0
-
+            
             attempts = attributes[ATTEMPTS_KEY]
             logging.info(f"processamento_tentativas: {attempts}")
-
+            
             if attempts > self.max_attempts:
                 self.set_status(attributes, ERROR_STATUS, ERROR_MESSAGE)
                 logging.info(f"processamento_status: {attributes[STATUS_KEY]}")
@@ -62,23 +90,28 @@ class ProcessMessage:
                 self.send_to_aws_sqs(self.env, message)
                 logging.info(f"Send Message Sqs Queue: {self.original_queue_url}")
                 self.count_retry_metric(attempts)
-
-            #self.dlq_queue.delete_message_dlq(receipt_handle)
-
-        return {
-            'message': 'Mensagem reenviada para fila',
-            'sqs': message
-        }
+                #self.dlq_queue.delete_message_dlq(receipt_handle)
+            
+            return {
+                "message": "Mensagem reenviada para fila",
+                "sqs": message
+            }
+        except Exception as ex:
+            logging.error("Erro no reprocessamento da mensagem %s", str(ex))
+            return {'error': str(ex)}
 
     def increment_attempts(self, attributes):
         attributes[ATTEMPTS_KEY] = attributes[ATTEMPTS_KEY] + 1
 
+
     def set_status(self, attributes, status, msg=None):
         attributes[STATUS_KEY] = status
+
 
     def send_to_aws_sqs(self, env, messagebody):
         send_to_sqs = SendToAwsSqs(env)
         send_to_sqs.send_message_to_queue(json.dumps(messagebody))
+
 
     def count_retry_metric(self, attempts):
         self.cloudwatch.count("reprocessamento_quantidade", attempts)
