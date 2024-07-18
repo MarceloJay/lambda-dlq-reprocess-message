@@ -86,6 +86,7 @@ class ProcessMessage:
             else:
                 if message.get('body'):
                     message = message.get('body')
+                    logging.info(f"Message body: {message.get('body')}")
 
                 self.increment_attempts(message)
                 logging.info(f"processamento_tentativas: {message[ATTEMPTS_KEY]}")
