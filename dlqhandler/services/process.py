@@ -93,7 +93,7 @@ class ProcessMessage:
                 self.set_status(message, REPROCESSING_STATUS)
                 logging.info(f"processamento_status: {message[STATUS_KEY]}")
                 logging.info(f"Send Message Sqs Queue: {self.original_queue_url}")
-                self.send_to_aws_sqs(self.env, message.get('body'))
+                self.send_to_aws_sqs(self.env, message)
                 self.count_retry_metric(attempts)
                 #self.dlq_queue.delete_message_dlq(receipt_handle)
             
