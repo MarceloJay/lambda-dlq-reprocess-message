@@ -83,11 +83,14 @@ class ProcessMessage:
                 # self.dlq_queue.delete_message_dlq(receipt_handle)
                 logging.info(f"Máximo de retentativas alcançadas: {message}")
             else:
+                if message.get('body'):
+                    message = message.get('body')
+                    
                 self.increment_attempts(message)
                 logging.info(f"processamento_tentativas: {message[ATTEMPTS_KEY]}")
                 self.set_status(message, REPROCESSING_STATUS)
                 logging.info(f"processamento_status: {message[STATUS_KEY]}")
-                self.send_to_aws_sqs(self.env, message)
+                self.send_to_aws_sqs(self.env, message.get('body'))
                 logging.info(f"Send Message Sqs Queue: {self.original_queue_url}")
                 self.count_retry_metric(attempts)
                 #self.dlq_queue.delete_message_dlq(receipt_handle)
