@@ -45,8 +45,10 @@ class ProcessMessage:
                 msg_a_ser_processada = msg[0]
                 try:
                     dict_msg = json.loads(msg_a_ser_processada)
+                    # logger.info(f"Processing message: {dict_msg}")
                     response = self.process_message(dict_msg)
                     response_list.append(response)
+                    logger.info("Mensagem reenviada para fila orquestrador com sucesso!")
                     qtd_msg_processadas += 1
                 except Exception as ex:
                     logging.error("Erro ao processar a mensagem: %s", str(msg_a_ser_processada))
@@ -78,9 +80,9 @@ class ProcessMessage:
             if attempts >= self.max_attempts:
                 self.set_status(message, ERROR_STATUS, ERROR_MESSAGE)
                 logger.info(f"processamento_status: {message[STATUS_KEY]}")
+                logging.error(f"Máximo de retentativas alcançadas: {attempts}")
                 self.cloudwatch.count("Máximo de retentativas alcançadas", 5)
                 # self.dlq_queue.delete_message_dlq(receipt_handle)
-                logging.error(f"Máximo de retentativas alcançadas: {message}")
             else:
                 self.increment_attempts(message)
                 logger.info(f"processamento_tentativas: {message[ATTEMPTS_KEY]}")
