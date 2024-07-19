@@ -77,7 +77,7 @@ class ProcessMessage:
             attempts = message[ATTEMPTS_KEY]
             logger.info(f"processamento_tentativas: {attempts}")
             
-            if attempts > self.max_attempts:
+            if attempts >= self.max_attempts:
                 self.set_status(message, ERROR_STATUS, ERROR_MESSAGE)
                 logger.info(f"processamento_status: {message[STATUS_KEY]}")
                 self.cloudwatch.count("Máximo de retentativas alcançadas", attempts)
