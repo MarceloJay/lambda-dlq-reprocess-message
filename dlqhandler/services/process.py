@@ -36,7 +36,7 @@ class ProcessMessage:
                 logger.info("Não existem mensagens para extrair da DLQ orquestrador mensageria: Conteúdo vazio!")
                 return {'message': 'No messages to process'}
             else:
-                logger.info(f"Quantidade de mensagens capturadas: {qtd_msg_capturadas}")
+                logging.info("Quantidade de mensagens capturadas: %s", str(qtd_msg_capturadas))
             
             response_list = []
             qtd_msg_processadas = 0
