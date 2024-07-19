@@ -80,7 +80,7 @@ class ProcessMessage:
             attempts = message[ATTEMPTS_KEY]
             logger.info(f"processamento_tentativas: {attempts}")
             
-            if attempts >= self.max_attempts:
+            if attempts >= int(self.max_attempts):
                 self.set_status(message, ERROR_STATUS, ERROR_MESSAGE)
                 logger.info(f"processamento_status: {message[STATUS_KEY]}")
                 logging.error(f"Máximo de retentativas alcançadas: {attempts}")
