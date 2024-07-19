@@ -84,10 +84,6 @@ class ProcessMessage:
                 self.cloudwatch.count("Máximo de retentativas alcançadas", 5)
                 # self.dlq_queue.delete_message_dlq(receipt_handle)
             else:
-                if message.get('body'):
-                    message = message.get('body')
-                    logging.info(f"Message body: {message.get('body')}")
-
                 self.increment_attempts(message)
                 logger.info(f"processamento_tentativas: {message[ATTEMPTS_KEY]}")
                 self.set_status(message, REPROCESSING_STATUS)
