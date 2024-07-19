@@ -48,7 +48,6 @@ class ProcessMessage:
                 try:
                     logger.info(f"Processing message 04 : {msg_a_ser_processada}")
                     dict_msg = json.loads(msg_a_ser_processada)
-                    logger.info(f"Processing message 05 : {dict_msg}")
                     response = self.process_message(dict_msg)
                     response_list.append(response)
                     logger.info("Mensagem reenviada para fila orquestrador com sucesso!")
