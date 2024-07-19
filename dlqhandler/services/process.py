@@ -40,15 +40,15 @@ class ProcessMessage:
             
             response_list = []
             qtd_msg_processadas = 0
-            logger.info(f"Processing message 01: {messages}")
+            logger.info(f"Processing message 01 : {messages}")
             for msg in messages:
-                logger.info(f"Processing message 02: {msg[0]}")
+                logger.info(f"Processing message 02 : {msg[0]}")
                 msg_a_ser_processada = msg[0]
-                logger.info(f"Processing message 03: {msg_a_ser_processada}")
+                logger.info(f"Processing message 03 : {msg_a_ser_processada}")
                 try:
-                    logger.info(f"Processing message 04: {msg_a_ser_processada}")
+                    logger.info(f"Processing message 04 : {msg_a_ser_processada}")
                     dict_msg = json.loads(msg_a_ser_processada)
-                    logger.info(f"Processing message 05: {dict_msg}")
+                    logger.info(f"Processing message 05 : {dict_msg}")
                     response = self.process_message(dict_msg)
                     response_list.append(response)
                     logger.info("Mensagem reenviada para fila orquestrador com sucesso!")
