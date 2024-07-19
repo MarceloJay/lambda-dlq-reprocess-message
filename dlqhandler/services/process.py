@@ -114,7 +114,10 @@ class ProcessMessage:
 
     def send_to_aws_sqs(self, env, messagebody):
         send_to_sqs = SendToAwsSqs(env)
-        send_to_sqs.send_message_to_queue(json.dumps(messagebody))
+        logger.info(f"\n############   messagebody ############## : {messagebody}\n")
+        messagetest = json.dumps(messagebody)
+        logger.info(f"\n############ messagetest ############: {messagetest}\n")
+        send_to_sqs.send_message_to_queue(json.dumps(messagetest))
 
 
     def count_retry_metric(self, attempts):
