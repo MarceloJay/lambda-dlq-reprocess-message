@@ -45,10 +45,8 @@ class ProcessMessage:
                 msg_a_ser_processada = msg[0]
                 try:
                     dict_msg = json.loads(msg_a_ser_processada)
-                    logger.info(f"Processing message: {dict_msg}")
                     response = self.process_message(dict_msg)
                     response_list.append(response)
-                    logger.info("Mensagem reenviada para fila orquestrador com sucesso! %s", response)
                     qtd_msg_processadas += 1
                 except Exception as ex:
                     logging.error("Erro ao processar a mensagem: %s", str(msg_a_ser_processada))
@@ -80,14 +78,10 @@ class ProcessMessage:
             if attempts >= self.max_attempts:
                 self.set_status(message, ERROR_STATUS, ERROR_MESSAGE)
                 logger.info(f"processamento_status: {message[STATUS_KEY]}")
-                self.cloudwatch.count("Máximo de retentativas alcançadas", attempts)
+                self.cloudwatch.count("Máximo de retentativas alcançadas", 5)
                 # self.dlq_queue.delete_message_dlq(receipt_handle)
                 logging.error(f"Máximo de retentativas alcançadas: {message}")
             else:
-                if message.get('body'):
-                    message = message.get('body')
-                    logging.info(f"Message body: {message.get('body')}")
-
                 self.increment_attempts(message)
                 logger.info(f"processamento_tentativas: {message[ATTEMPTS_KEY]}")
                 self.set_status(message, REPROCESSING_STATUS)
@@ -115,7 +109,6 @@ class ProcessMessage:
 
     def send_to_aws_sqs(self, env, messagebody):
         send_to_sqs = SendToAwsSqs(env)
-        logging.info(f"Mensagem : {messagebody}")
         send_to_sqs.send_message_to_queue(json.dumps(messagebody))
 
 
