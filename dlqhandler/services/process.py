@@ -121,7 +121,8 @@ class ProcessMessage:
         logger.info(f"\n############   messagebody ############## : {messagebody}\n")
         messagetest = json.dumps(messagebody)
         logger.info(f"\n############ messagetest ############: {messagetest}\n")
-        send_to_sqs.send_message_to_queue(json.dumps(messagetest))
+        message = messagebody.replace("'", "\"")
+        send_to_sqs.send_message_to_queue(message)
 
 
     def count_retry_metric(self, attempts):
