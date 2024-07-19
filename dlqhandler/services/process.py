@@ -45,10 +45,10 @@ class ProcessMessage:
                 msg_a_ser_processada = msg[0]
                 try:
                     dict_msg = json.loads(msg_a_ser_processada)
-                    logger.info(f"Processing message: {dict_msg}")
+                    # logger.info(f"Processing message: {dict_msg}")
                     response = self.process_message(dict_msg)
                     response_list.append(response)
-                    logger.info("Mensagem reenviada para fila orquestrador com sucesso! %s", response)
+                    logger.info("Mensagem reenviada para fila orquestrador com sucesso!")
                     qtd_msg_processadas += 1
                 except Exception as ex:
                     logging.error("Erro ao processar a mensagem: %s", str(msg_a_ser_processada))
@@ -115,7 +115,6 @@ class ProcessMessage:
 
     def send_to_aws_sqs(self, env, messagebody):
         send_to_sqs = SendToAwsSqs(env)
-        logging.info(f"Mensagem : {messagebody}")
         send_to_sqs.send_message_to_queue(json.dumps(messagebody))
 
 
