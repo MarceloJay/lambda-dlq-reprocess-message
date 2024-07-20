@@ -36,13 +36,15 @@ class ProcessMessage:
                 logger.info("Não existem mensagens para extrair da DLQ orquestrador mensageria: Conteúdo vazio!")
                 return {'message': 'No messages to process'}
             else:
-                logger.info(f"Quantidade de mensagens capturadas: {qtd_msg_capturadas}")
+                logging.info("Quantidade de mensagens capturadas: %s", str(qtd_msg_capturadas))
             
             response_list = []
             qtd_msg_processadas = 0
-            
+            logger.info(f"Processing message 01 : {messages}")
             for msg in messages:
+                logger.info(f"Processing message 02 : {msg[0]}")
                 msg_a_ser_processada = msg[0]
+                logger.info(f"Processing message 03 : {msg_a_ser_processada}")
                 try:
                     if isinstance(msg_a_ser_processada, dict):
                         dict_msg = msg_a_ser_processada
@@ -79,17 +81,13 @@ class ProcessMessage:
             attempts = message[ATTEMPTS_KEY]
             logger.info(f"processamento_tentativas: {attempts}")
             
-            if attempts >= self.max_attempts:
+            if attempts >= int(self.max_attempts):
                 self.set_status(message, ERROR_STATUS, ERROR_MESSAGE)
                 logger.info(f"processamento_status: {message[STATUS_KEY]}")
                 logging.error(f"Máximo de retentativas alcançadas: {attempts}")
                 self.cloudwatch.count("Máximo de retentativas alcançadas", 5)
                 # self.dlq_queue.delete_message_dlq(receipt_handle)
             else:
-                if message.get('body'):
-                    message = message.get('body')
-                    logging.info(f"Message body: {message.get('body')}")
-
                 self.increment_attempts(message)
                 logger.info(f"processamento_tentativas: {message[ATTEMPTS_KEY]}")
                 self.set_status(message, REPROCESSING_STATUS)
@@ -117,7 +115,11 @@ class ProcessMessage:
 
     def send_to_aws_sqs(self, env, messagebody):
         send_to_sqs = SendToAwsSqs(env)
-        send_to_sqs.send_message_to_queue(json.dumps(messagebody))
+        logger.info(f"\n############   messagebody ############## : {messagebody}\n")
+        messagetest = json.dumps(messagebody)
+        logger.info(f"\n############ messagetest ############: {messagetest}\n")
+        message = messagebody.replace("'", "\"")
+        send_to_sqs.send_message_to_queue(message)
 
 
     def count_retry_metric(self, attempts):
