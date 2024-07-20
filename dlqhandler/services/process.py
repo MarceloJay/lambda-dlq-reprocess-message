@@ -44,7 +44,10 @@ class ProcessMessage:
             for msg in messages:
                 msg_a_ser_processada = msg[0]
                 try:
-                    dict_msg = json.loads(msg_a_ser_processada)
+                    if isinstance(msg_a_ser_processada, dict):
+                        dict_msg = msg_a_ser_processada
+                    else:    
+                        dict_msg = json.loads(msg_a_ser_processada)
                     response = self.process_message(dict_msg)
                     response_list.append(response)
                     logger.info("Mensagem reenviada para fila orquestrador com sucesso!")
