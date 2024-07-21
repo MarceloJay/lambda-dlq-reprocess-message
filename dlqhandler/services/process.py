@@ -83,8 +83,8 @@ class ProcessMessage:
             if attempts >= int(self.max_attempts):
                 self.set_status(message, ERROR_STATUS, ERROR_MESSAGE)
                 logger.info(f"processamento_status: {message[STATUS_KEY]}")
-                logging.error(f"Máximo de retentativas alcançadas: {attempts}")
-                self.cloudwatch.count("Máximo de retentativas alcançadas", {str(attempts)})
+                logging.error("Máximo de retentativas alcançadas")
+                self.cloudwatch.count("Máximo de retentativas alcançadas", attempts)
                 # self.dlq_queue.delete_message_dlq(receipt_handle)
             else:
                 self.increment_attempts(message)
