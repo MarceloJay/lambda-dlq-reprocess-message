@@ -40,11 +40,11 @@ class ProcessMessage:
             
             response_list = []
             qtd_msg_processadas = 0
-            logger.info(f"Processing message 01 : {messages}")
+            
             for msg in messages:
-                logger.info(f"Processing message 02 : {msg[0]}")
+                
                 msg_a_ser_processada = msg[0]
-                logger.info(f"Processing message 03 : {msg_a_ser_processada}")
+                logger.info(f"Mensagem a ser processada: {msg_a_ser_processada}")
                 try:
                     if isinstance(msg_a_ser_processada, dict):
                         dict_msg = msg_a_ser_processada
@@ -72,7 +72,6 @@ class ProcessMessage:
 
     def process_message(self, message):
         
-        logger.info(f"Processing message: {message}")
         try:
             
             if not message.get(ATTEMPTS_KEY):
@@ -85,7 +84,7 @@ class ProcessMessage:
                 self.set_status(message, ERROR_STATUS, ERROR_MESSAGE)
                 logger.info(f"processamento_status: {message[STATUS_KEY]}")
                 logging.error(f"Máximo de retentativas alcançadas: {attempts}")
-                self.cloudwatch.count("Máximo de retentativas alcançadas", 5)
+                self.cloudwatch.count("Máximo de retentativas alcançadas", {str(attempts)})
                 # self.dlq_queue.delete_message_dlq(receipt_handle)
             else:
                 self.increment_attempts(message)
