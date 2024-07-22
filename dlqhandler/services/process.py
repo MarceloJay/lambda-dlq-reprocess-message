@@ -84,7 +84,7 @@ class ProcessMessage:
                 self.set_status(message, ERROR_STATUS, ERROR_MESSAGE)
                 logger.info(f"processamento_status: {message[STATUS_KEY]}")
                 logging.error("Máximo de retentativas alcançadas")
-                self.cloudwatch.count("Máximo de retentativas alcançadas", attempts)
+                self.cloudwatch.count("Máximo_retentativas_alcançadas", attempts)
                 # self.dlq_queue.delete_message_dlq(receipt_handle)
             else:
                 self.increment_attempts(message)
@@ -114,9 +114,6 @@ class ProcessMessage:
 
     def send_to_aws_sqs(self, env, messagebody):
         send_to_sqs = SendToAwsSqs(env)
-        logger.info(f"\n############   messagebody ############## : {messagebody}\n")
-        messagetest = json.dumps(messagebody)
-        logger.info(f"\n############ messagetest ############: {messagetest}\n")
         send_to_sqs.send_message_to_queue(json.dumps(messagebody))
 
 
