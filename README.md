@@ -24,3 +24,6 @@ process_message_handler = ProcessMessage(
 
 # Process the messages from the DLQ
 process_message_handler.execute()
+
+
+https://pypi.org/account/confirm-login/?token= . eJw1jdsOwiAQRH_ F8Krb7AKFws80dAFDUmns5cn472KNj zOTc- YlAu9lqcKLebmXCrzUXNZHOMubOLa0 diW22aAkI5EgRougFToIPTKQZeKsKE _R_oE5bPt4- hooURpACeguiJ6cl6ZzTYR4bRnxC9X yPNKPGM- 3wFYZaydINmnQPWsYBk2QKFGvlaGQp Xh_APVfNag.aahtqw. evG6Oy4zyhAy_ KB4rj2auCaoHeLmenng9fnA0BzofAC cikNQlY8zz-XeorZYL61hz2_ HjFMd6mFwxeh9zPxXXA
